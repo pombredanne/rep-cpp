@@ -53,7 +53,16 @@ namespace Rep
         return false;
     }
 
-    Robots::Robots(const std::string& content): agents_(), sitemaps_(), default_(agents_["*"])
+    Robots::Robots(const std::string& content) :
+        Robots(content, "")
+    {
+    }
+
+    Robots::Robots(const std::string& content, const std::string& base_url) :
+        host_(Url::Url(base_url).host()),
+        agents_(),
+        sitemaps_(),
+        default_(agents_.emplace("*", Agent(host_)).first->second)
     {
         std::string agent_name("*");
         std::istringstream input(content);
@@ -82,12 +91,12 @@ namespace Rep
                     {
                         for (auto other : group)
                         {
-                            agents_[other] = current->second;
+                            agents_.emplace(other, current->second);
                         }
                         group.clear();
                     }
                     agent_name = value;
-                    current = agents_.emplace(agent_name, Agent()).first;
+                    current = agents_.emplace(agent_name, Agent(host_)).first;
                 }
                 last_agent = true;
                 continue;
@@ -126,7 +135,7 @@ namespace Rep
         {
             for (auto other : group)
             {
-                agents_[other] = current->second;
+                agents_.emplace(other, current->second);
             }
         }
     }
@@ -151,6 +160,26 @@ namespace Rep
     bool Robots::allowed(const std::string& path, const std::string& name) const
     {
         return agent(name).allowed(path);
+    }
+
+    std::string Robots::str() const
+    {
+        std::stringstream out;
+        // TODO: include sitepath info
+        out << '{';
+        auto begin = agents_.begin();
+        auto end = agents_.end();
+        if (begin != end)
+        {
+            out << '"' << begin->first << '"' << ": " << begin->second.str();
+            ++begin;
+        }
+        for (; begin != end; ++begin)
+        {
+            out << ", \"" << begin->first << '"' << ": " << begin->second.str();
+        }
+        out << '}';
+        return out.str();
     }
 
     std::string Robots::robotsUrl(const std::string& url)

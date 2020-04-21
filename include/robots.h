@@ -19,17 +19,13 @@ namespace Rep
         /**
          * Create a robots.txt from a utf-8-encoded string.
          */
-        Robots(const std::string& content);
+        explicit Robots(const std::string& content);
 
         /**
-         * Instantiate a Robots object.
+         * Create a robots.txt from a utf-8-encoded string assuming
+         * the given base_url.
          */
-        Robots(
-            const agent_map_t& agents,
-            const sitemaps_t& sitemaps)
-            : agents_(agents)
-            , sitemaps_(sitemaps)
-            , default_(agents_["*"]) {}
+        Robots(const std::string& content, const std::string& base_url);
 
         /**
          * Get the sitemaps in this robots.txt
@@ -42,9 +38,12 @@ namespace Rep
         const Agent& agent(const std::string& name) const;
 
         /**
-         * Return true if agent is allowed to fetch the URL (either a full URL or a path).
+         * Return true if agent is allowed to fetch the URL (either a
+         * full URL or a path).
          */
         bool allowed(const std::string& path, const std::string& name) const;
+
+        std::string str() const;
 
         /**
          * Return the robots.txt URL corresponding to the provided URL.
@@ -57,6 +56,7 @@ namespace Rep
         static bool getpair(
             std::istringstream& stream, std::string& key, std::string& value);
 
+        std::string host_;
         agent_map_t agents_;
         sitemaps_t sitemaps_;
         Agent& default_;

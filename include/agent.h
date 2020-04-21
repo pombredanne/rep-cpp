@@ -5,10 +5,14 @@
 
 #include "directive.h"
 
+// forward declaration
+namespace Url
+{
+    struct Url;
+}
 
 namespace Rep
 {
-
     class Agent
     {
     public:
@@ -16,9 +20,25 @@ namespace Rep
         typedef float delay_t;
 
         /**
+         * Default constructor
+         */
+        Agent() : Agent("") {}
+
+        /**
          * Construct an agent.
          */
-        Agent(): directives_(), delay_(-1.0), sorted_(true) {}
+        explicit Agent(const std::string& host) :
+            directives_(), delay_(-1.0), sorted_(true), host_(host) {}
+
+        /**
+         * Default copy constructor.
+         */
+        Agent(const Agent& rhs) = default;
+
+        /**
+         * Default move constructor.
+         */
+        Agent(Agent&& rhs) = default;
 
         /**
          * Add an allowed directive.
@@ -53,15 +73,20 @@ namespace Rep
          */
         bool allowed(const std::string& path) const;
 
+        std::string str() const;
+
         /**
-         * Canonically escape the provided query for matching purposes.
+         * Default copy assignment operator.
          */
-        static std::string escape(const std::string& query);
+        Agent& operator=(const Agent& rhs) = default;
 
     private:
+        bool is_external(const Url::Url& url) const;
+
         mutable std::vector<Directive> directives_;
         delay_t delay_;
         mutable bool sorted_;
+        std::string host_;
     };
 }
 

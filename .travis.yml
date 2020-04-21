@@ -1,10 +1,16 @@
-sudo: required
-dist: trusty
+sudo: false
+dist: bionic
 git:
   submodules: true
 compiler:
   - gcc
   - clang
 language: cpp
+python:
+  - '3.5'
 before_install: scripts/travis/before_install.sh
-script: make test
+script: scripts/travis/script.sh
+addons:
+  apt:
+    packages:
+    - cmake
